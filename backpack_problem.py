@@ -12,6 +12,17 @@ class BackpackProblem:
             self.items.append(BackpackItem(v,w))
         self.weight_limit:float = weight_limit
 
-    #根据重量从小到大排序
+    #根据性价比从小到大排序
     def sort(self): 
-        self.items.sort(key= lambda item:item.weight)
+        self.items.sort(key= lambda item:item.value/item.weight)
+
+def read_backpack_problems()->List[BackpackProblem]:
+    problems:List[BackpackItem] = []
+    with open("test.txt") as f:
+        case_cnt = int(f.readline())
+        for _ in range(case_cnt):
+            weight_limit = int(f.readline())
+            values = list(map(float,f.readline().split(',')))
+            weights = list(map(float,f.readline().split(',')))
+            problems.append(BackpackProblem(values,weights,weight_limit))
+    return problems
