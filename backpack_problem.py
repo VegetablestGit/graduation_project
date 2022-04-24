@@ -19,9 +19,11 @@ class BackpackProblem:
 def read_backpack_problems()->List[BackpackProblem]:
     problems:List[BackpackItem] = []
     with open("test.txt") as f:
-        case_cnt = int(f.readline())
-        for _ in range(case_cnt):
-            weight_limit = int(f.readline())
+        while True:
+            weight_limit = f.readline()
+            if weight_limit == '':
+                break
+            weight_limit = int(weight_limit)
             values = list(map(float,f.readline().split(',')))
             weights = list(map(float,f.readline().split(',')))
             problems.append(BackpackProblem(values,weights,weight_limit))
