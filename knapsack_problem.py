@@ -1,20 +1,15 @@
 from pickletools import optimize
 from typing import List
 import numpy as np
+import random
 
-class BackpackItem:
-    def __init__(self,value:np.ndarray,weight:np.ndarray) -> None:
-        self.value = value
-        self.weight = weight
-
-class BackpackProblem:
-    def __init__(self,values:np.ndarray,weights:np.ndarray,weight_limit:float,optimize:bool) -> None:
+class KnapsackProBlem:
+    def __init__(self,values:np.ndarray,weights:np.ndarray,weight_limit:float) -> None:
         self.weights = weights
         self.values = values
         self.weight_limit:float = weight_limit
         self.optimize = optimize
-        if optimize:
-            self.sort()
+        self.sort()
 
     #根据性价比从小到大排序
     def sort(self): 
@@ -25,21 +20,29 @@ class BackpackProblem:
     
     def len(self):
         return len(self.weights)
+
+    def calc(self,pos):
+        sorted_pos = list(enumerate(pos))
+        sorted_pos.sort(key=lambda p:p[1],reverse=True)
+        weight,value = 0,0
+        for p in sorted_pos:
+            if self.weights[p[0]]+weight > self.weight_limit:
+                break
+            weight += self.weights[p[0]]
+            value += self.values[p[0]]
+        return value
+
     
     #计算重量并优化pos 多退少补
-    def calc_value(self,pos:np.ndarray)->float:
+    def calc_value_and_optimise(self,pos)->float:
+        pos = np.array(pos)
         value = np.where(pos>=0.5,self.values,np.zeros_like(pos)).sum()
         weight = np.where(pos>=0.5,self.weights,np.zeros_like(pos)).sum()
-        if not optimize:
-            if weight > self.weight_limit:
-                return 0
-            else:
-                return value
 
         if weight > self.weight_limit: #多退
             for i,x in enumerate(pos): 
                 if x >= 0.5:
-                    pos[i] = 0.49
+                    #pos[i] = 0.49
                     weight -= self.weights[i]
                     value -= self.values[i]
                 if weight <= self.weight_limit:
@@ -47,12 +50,12 @@ class BackpackProblem:
         else: #少补
             for i,x in reversed(list(enumerate(pos))): 
                 if x < 0.5 and weight + self.weights[i] <= self.weight_limit:
-                    pos[i] = 0.51
+                    #pos[i] = 0.51
                     weight += self.weights[i]
                     value += self.values[i]
         return value
 
-def read_backpack_problems(optimize:bool)->List[BackpackProblem]:
+def read_knapsack_problems()->List[KnapsackProBlem]:
     problems = []
     with open("test.txt") as f:
         while True:
@@ -62,5 +65,5 @@ def read_backpack_problems(optimize:bool)->List[BackpackProblem]:
             weight_limit = int(weight_limit)
             values = list(map(float,f.readline().split(',')))
             weights = list(map(float,f.readline().split(',')))
-            problems.append(BackpackProblem(values,weights,weight_limit,optimize))
+            problems.append(KnapsackProBlem(values,weights,weight_limit))
     return problems
